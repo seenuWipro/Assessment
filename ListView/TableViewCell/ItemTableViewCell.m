@@ -24,7 +24,7 @@
 -(void)addImageViewLayout {
     
     NSDictionary *views = @{@"imageView":self.itemImageView,@"title":self.titleLabel,@"description":self.descriptionLabel};
-    NSDictionary *metrics = @{@"imageSize":@80.0,@"padding":@15.0};
+    NSDictionary *metrics = @{@"imageSize":@100.0,@"padding":@15.0};
 
     // Horizontal layouts
     NSArray *horizontalImgeandTitle =[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-padding-[imageView]-padding-[title]-padding-|" options:0 metrics:metrics views:views];
