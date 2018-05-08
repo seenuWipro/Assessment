@@ -14,4 +14,5 @@
 @property(nonatomic, weak) IBOutlet UILabel *titleLabel;
 @property(nonatomic, weak) IBOutlet UILabel *descriptionLabel;
 
+-(void)setImageFromURL:(NSURL*)imageURL;
 @end

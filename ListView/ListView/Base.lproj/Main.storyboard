@@ -12,7 +12,7 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="xk3-kG-oDs"/>
                         <viewControllerLayoutGuide type="bottom" id="beB-iA-otA"/>
@@ -72,10 +72,14 @@
                                     </tableViewCell>
                                 </prototypes>
                                 <connections>
-                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="1qO-fb-F2D"/>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="nq9-L2-ITF"/>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="ZfB-eA-Bgi"/>
                                 </connections>
                             </tableView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="uLP-B8-LcB">
+                                <rect key="frame" x="177" y="323" width="20" height="20"/>
+                                <color key="color" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -86,9 +90,12 @@
                             <constraint firstItem="beB-iA-otA" firstAttribute="top" secondItem="45a-2R-y6B" secondAttribute="bottom" id="Vzb-db-Q9f"/>
                             <constraint firstItem="45a-2R-y6B" firstAttribute="top" secondItem="lPx-EO-Zgf" secondAttribute="bottom" id="hGZ-z4-H2r"/>
                             <constraint firstItem="lPx-EO-Zgf" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="mPY-fQ-a8W"/>
+                            <constraint firstItem="uLP-B8-LcB" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="uDS-Wg-N9s"/>
+                            <constraint firstItem="uLP-B8-LcB" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xFe-gH-GWb"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activity" destination="uLP-B8-LcB" id="zpB-fa-V8G"/>
                         <outlet property="naviBar" destination="lPx-EO-Zgf" id="s1t-K9-hNM"/>
                         <outlet property="tableView" destination="45a-2R-y6B" id="5jD-lx-Qoj"/>
                     </connections>

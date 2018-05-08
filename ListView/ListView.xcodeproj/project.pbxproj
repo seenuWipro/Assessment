@@ -16,6 +16,7 @@
 		43C960DA20A01D9300F47BFA /* ListViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 43C960D920A01D9300F47BFA /* ListViewTests.m */; };
 		43C960E520A01D9300F47BFA /* ListViewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 43C960E420A01D9300F47BFA /* ListViewUITests.m */; };
 		43C960F720A0365500F47BFA /* ItemTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 43C960F620A0365500F47BFA /* ItemTableViewCell.m */; };
+		43F3C71420A1A7C7003F0F82 /* NetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 43F3C71320A1A7C7003F0F82 /* NetworkManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,8 @@
 		43C960E620A01D9300F47BFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43C960F520A0365500F47BFA /* ItemTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ItemTableViewCell.h; sourceTree = "<group>"; };
 		43C960F620A0365500F47BFA /* ItemTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ItemTableViewCell.m; sourceTree = "<group>"; };
+		43F3C71220A1A7C7003F0F82 /* NetworkManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NetworkManager.h; sourceTree = "<group>"; };
+		43F3C71320A1A7C7003F0F82 /* NetworkManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetworkManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +107,7 @@
 		43C960BF20A01D9300F47BFA /* ListView */ = {
 			isa = PBXGroup;
 			children = (
+				43F3C71120A1A789003F0F82 /* Network */,
 				43C960F420A0334E00F47BFA /* TableViewCell */,
 				43C960C020A01D9300F47BFA /* AppDelegate.h */,
 				43C960C120A01D9300F47BFA /* AppDelegate.m */,
@@ -144,6 +148,15 @@
 			);
 			path = TableViewCell;
 			sourceTree = SOURCE_ROOT;
+		};
+		43F3C71120A1A789003F0F82 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				43F3C71220A1A7C7003F0F82 /* NetworkManager.h */,
+				43F3C71320A1A7C7003F0F82 /* NetworkManager.m */,
+			);
+			path = Network;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -281,6 +294,7 @@
 				43C960F720A0365500F47BFA /* ItemTableViewCell.m in Sources */,
 				43C960C520A01D9300F47BFA /* ViewController.m in Sources */,
 				43C960D020A01D9300F47BFA /* main.m in Sources */,
+				43F3C71420A1A7C7003F0F82 /* NetworkManager.m in Sources */,
 				43C960C220A01D9300F47BFA /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

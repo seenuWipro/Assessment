@@ -7,15 +7,15 @@
 //
 
 #import "ViewController.h"
+#import "NetworkManager.h"
 #import "ItemTableViewCell.h"
 
 static NSString *cellIdentifier = @"ItemTableViewCell";
-static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl/facts.json";
 
 @interface ViewController ()
 
-@property(nonatomic, weak) IBOutlet UITableView *tableView;
 @property(nonatomic, weak) IBOutlet UINavigationBar *naviBar;
+@property (nonatomic, weak) IBOutlet UIActivityIndicatorView *activity;
 
 @property (nonatomic, strong) NSMutableArray *tableItems;
 @property (nonatomic, strong) UIRefreshControl *refreshControl;
@@ -33,14 +33,19 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
     self.tableView.estimatedRowHeight = 44.0;
     self.tableView.tableFooterView = nil;
     
-    [self fetchDetails];
-    
     // pull down refresh
     self.refreshControl = [[UIRefreshControl alloc]init];
     [self.tableView addSubview:self.refreshControl];
     [self.refreshControl addTarget:self action:@selector(refreshTable) forControlEvents:UIControlEventValueChanged];
 }
 
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    if (self.tableItems == nil) {
+        [self fetchDetails];
+    }
+}
 
 #pragma mark - UITableViewDataSource
 
@@ -73,17 +78,7 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
         NSString *strImgURLAsString = [dict objectForKey:@"imageHref"];
         [strImgURLAsString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSURL *imgURL = [NSURL URLWithString:strImgURLAsString];
-        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imgURL] queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-            if (!connectionError) {
-                UIImage *img = [[UIImage alloc] initWithData:data];
-                // validate for refresh imageview
-                if (cell.itemImageView) {
-                    cell.itemImageView.image = img;
-                }
-            }else{
-                NSLog(@"%@",connectionError);
-            }
-        }];
+        [cell setImageFromURL:imgURL];
     }
     
     return cell;
@@ -107,38 +102,46 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
 -(void)fetchDetails {
     typeof(self) weakSelf = self;
     
-    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:APIPath]];
-    [NSURLConnection sendAsynchronousRequest:request
-                                       queue:[NSOperationQueue mainQueue]
-                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-                               NSError* error = nil;
-                               
-                               NSString *iso = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
-                               NSData *dutf8 = [iso dataUsingEncoding:NSUTF8StringEncoding];
-                               
-                               NSDictionary *json = [NSJSONSerialization JSONObjectWithData:dutf8 options:0 error:&error];
-                               
-                               dispatch_async(dispatch_get_main_queue(), ^{
-                                   
-                                   [weakSelf.refreshControl endRefreshing];
+    [NetworkManager fetchDetails:^(NSDictionary *result, NSError *error) {
+        [weakSelf.activity stopAnimating];
+        [[weakSelf tableView] reloadData];
+        [[weakSelf refreshControl] performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.0];
+        
+        if (result != nil) {
+            [weakSelf updateDetail:result];
+        } else {
+            
+            NSString *title = @"Error";
+            NSString *message = @"Something went wrong. Please try again";
 
-                                   if (json != nil) {
-                                       [weakSelf updateDetail:json];
-                                       
-                                   } else {
-                                       NSLog(@"error: %@", error);
-                                   }
-                               });
-                           }];
+            if ([UIAlertController class]) {
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+                
+                UIAlertAction* ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+                [alertController addAction:ok];
+                
+                [self presentViewController:alertController animated:YES completion:nil];
+            } else {
+                
+                UIAlertView * alert = [[UIAlertView alloc]initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                
+                [alert show];
+                
+            }
+        }
+    }];
 }
 
 -(void)updateDetail:(NSDictionary *)details {
+    
+    if (self.tableItems == nil) {
+        self.tableItems = [NSMutableArray array];
+    }
     
     if ([details objectForKey:@"title"]) {
         self.naviBar.topItem.title = [details objectForKey:@"title"];
     }
     
-    self.tableItems = [NSMutableArray array];
     if ([details objectForKey:@"rows"]) {
         for (NSDictionary *dict in [details objectForKey:@"rows"]) {
             if ([dict objectForKey:@"title"] != [NSNull null] || [dict objectForKey:@"description"] != [NSNull null] || [dict objectForKey:@"imageHref"] != [NSNull null]) {

@@ -7,6 +7,7 @@
 //
 
 #import "ItemTableViewCell.h"
+#import "NetworkManager.h"
 
 @implementation ItemTableViewCell
 
@@ -47,6 +48,19 @@
     // ContentHugging for uilabel auto height
     [self.titleLabel setContentHuggingPriority:252
                                              forAxis:UILayoutConstraintAxisVertical];
+}
+
+-(void)setImageFromURL:(NSURL*)imageURL {
+    typeof(self) weakSelf = self;
+    [NetworkManager downloadImage:imageURL completion:^(NSData *imageData, NSError *error) {
+        if (imageData) {
+            UIImage *img = [[UIImage alloc] initWithData:imageData];
+            // validate for refresh imageview
+            if (weakSelf.itemImageView) {
+                weakSelf.itemImageView.image = img;
+            }
+        }
+    }];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
