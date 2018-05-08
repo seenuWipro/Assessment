@@ -17,7 +17,8 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
 @property(nonatomic, weak) IBOutlet UITableView *tableView;
 @property(nonatomic, weak) IBOutlet UINavigationBar *naviBar;
 
-@property (nonatomic, strong) NSArray *tableItems;
+@property (nonatomic, strong) NSMutableArray *tableItems;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
 
@@ -33,6 +34,11 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
     self.tableView.tableFooterView = nil;
     
     [self fetchDetails];
+    
+    // pull down refresh
+    self.refreshControl = [[UIRefreshControl alloc]init];
+    [self.tableView addSubview:self.refreshControl];
+    [self.refreshControl addTarget:self action:@selector(refreshTable) forControlEvents:UIControlEventValueChanged];
 }
 
 
@@ -70,8 +76,10 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:imgURL] queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
             if (!connectionError) {
                 UIImage *img = [[UIImage alloc] initWithData:data];
-                // pass the img to your imageview
-                cell.itemImageView.image = img;
+                // validate for refresh imageview
+                if (cell.itemImageView) {
+                    cell.itemImageView.image = img;
+                }
             }else{
                 NSLog(@"%@",connectionError);
             }
@@ -89,6 +97,13 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
 }
 
 #pragma mark - Fetch details
+
+- (void)refreshTable {
+    [self.tableItems removeAllObjects];
+    [self.tableView reloadData];
+    [self fetchDetails];
+}
+
 -(void)fetchDetails {
     typeof(self) weakSelf = self;
     
@@ -101,17 +116,19 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
                                NSString *iso = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
                                NSData *dutf8 = [iso dataUsingEncoding:NSUTF8StringEncoding];
                                
-                               NSDictionary *json = [NSJSONSerialization JSONObjectWithData:dutf8
-                                                                                    options:0
-                                                                                      error:&error];
-                               if (json != nil) {
-                                   dispatch_async(dispatch_get_main_queue(), ^{
-                                       [weakSelf updateDetail:json];
-                                   });
+                               NSDictionary *json = [NSJSONSerialization JSONObjectWithData:dutf8 options:0 error:&error];
+                               
+                               dispatch_async(dispatch_get_main_queue(), ^{
                                    
-                               } else {
-                                   NSLog(@"error: %@", error);
-                               }
+                                   [weakSelf.refreshControl endRefreshing];
+
+                                   if (json != nil) {
+                                       [weakSelf updateDetail:json];
+                                       
+                                   } else {
+                                       NSLog(@"error: %@", error);
+                                   }
+                               });
                            }];
 }
 
@@ -121,8 +138,13 @@ static NSString *APIPath = @"https://dl.dropboxusercontent.com/s/2iodh4vg0eortkl
         self.naviBar.topItem.title = [details objectForKey:@"title"];
     }
     
+    self.tableItems = [NSMutableArray array];
     if ([details objectForKey:@"rows"]) {
-        self.tableItems = [details objectForKey:@"rows"];
+        for (NSDictionary *dict in [details objectForKey:@"rows"]) {
+            if ([dict objectForKey:@"title"] != [NSNull null] || [dict objectForKey:@"description"] != [NSNull null] || [dict objectForKey:@"imageHref"] != [NSNull null]) {
+                [self.tableItems addObject:dict];
+            }
+        }
     }
     
     [self.tableView reloadData];
