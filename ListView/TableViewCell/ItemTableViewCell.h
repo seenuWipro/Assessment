@@ -7,12 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ItemModel.h"
 
 @interface ItemTableViewCell : UITableViewCell
 
-@property(nonatomic, weak) IBOutlet UIImageView *itemImageView;
-@property(nonatomic, weak) IBOutlet UILabel *titleLabel;
-@property(nonatomic, weak) IBOutlet UILabel *descriptionLabel;
+@property(nonatomic, strong) UIImageView *itemImageView;
+@property(nonatomic, strong) UILabel *titleLabel;
+@property(nonatomic, strong) UILabel *descriptionLabel;
 
+-(void)setDetails:(ItemModel *)item;
 -(void)setImageFromURL:(NSURL*)imageURL;
 @end

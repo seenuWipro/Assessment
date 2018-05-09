@@ -7,15 +7,19 @@
 //
 
 #import "ViewController.h"
+
+// NSObject
 #import "NetworkManager.h"
+#import "ItemModel.h"
+
+// View
 #import "ItemTableViewCell.h"
 
 static NSString *cellIdentifier = @"ItemTableViewCell";
 
 @interface ViewController ()
 
-@property(nonatomic, weak) IBOutlet UINavigationBar *naviBar;
-@property (nonatomic, weak) IBOutlet UIActivityIndicatorView *activity;
+@property (nonatomic, strong) UIActivityIndicatorView *activity;
 
 @property (nonatomic, strong) NSMutableArray *tableItems;
 @property (nonatomic, strong) UIRefreshControl *refreshControl;
@@ -28,6 +32,48 @@ static NSString *cellIdentifier = @"ItemTableViewCell";
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    // Set spinner
+    self.activity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [self.activity startAnimating];
+    [self.activity hidesWhenStopped];
+    [self.activity setColor:[UIColor redColor]];
+    self.activity.center = self.view.center;
+    [self.view addSubview:self.activity];
+
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    [self addTableView];
+    if (self.tableItems == nil) {
+        [self fetchDetails];
+    }
+}
+
+#pragma mark - UI setup
+-(void)addTableView {
+    
+    // init table view
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    self.tableView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    // add clear bg color for spinner visible
+    [self.tableView setBackgroundColor:[UIColor clearColor]];
+    
+    // must set delegate & dataSource, otherwise the the table will be empty and not responsive
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    [self.view addSubview:self.tableView];
+
+    [self.tableView registerClass:[ItemTableViewCell class] forCellReuseIdentifier:cellIdentifier];
+    
+    NSDictionary *views = @{@"tableView":self.tableView};
+
+    // tableviw auto layout
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat: @"H:|[tableView]|" options:0 metrics:nil views:views]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat: @"V:|[tableView]|" options:0 metrics:nil views:views]];
+    
     // dynamic height
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44.0;
@@ -37,14 +83,6 @@ static NSString *cellIdentifier = @"ItemTableViewCell";
     self.refreshControl = [[UIRefreshControl alloc]init];
     [self.tableView addSubview:self.refreshControl];
     [self.refreshControl addTarget:self action:@selector(refreshTable) forControlEvents:UIControlEventValueChanged];
-}
-
--(void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
-    if (self.tableItems == nil) {
-        [self fetchDetails];
-    }
 }
 
 #pragma mark - UITableViewDataSource
@@ -64,22 +102,7 @@ static NSString *cellIdentifier = @"ItemTableViewCell";
     cell.descriptionLabel.text = @"";
     cell.itemImageView.image = nil;
 
-    NSDictionary *dict = [self.tableItems objectAtIndex:indexPath.row];
-    
-    if ([dict objectForKey:@"title"] && [dict objectForKey:@"title"] != [NSNull null]) {
-        cell.titleLabel.text = [dict objectForKey:@"title"];
-    }
-    
-    if ([dict objectForKey:@"description"] && [dict objectForKey:@"description"] != [NSNull null]) {
-        cell.descriptionLabel.text = [dict objectForKey:@"description"];
-    }
-    
-    if ([dict objectForKey:@"imageHref"] && [dict objectForKey:@"imageHref"] != [NSNull null]) {
-        NSString *strImgURLAsString = [dict objectForKey:@"imageHref"];
-        [strImgURLAsString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *imgURL = [NSURL URLWithString:strImgURLAsString];
-        [cell setImageFromURL:imgURL];
-    }
+    [cell setDetails:[self.tableItems objectAtIndex:indexPath.row]];
     
     return cell;
 }
@@ -103,6 +126,8 @@ static NSString *cellIdentifier = @"ItemTableViewCell";
     typeof(self) weakSelf = self;
     
     [NetworkManager fetchDetails:^(NSDictionary *result, NSError *error) {
+        // add white bg color for tableview display
+        [self.tableView setBackgroundColor:[UIColor whiteColor]];
         [weakSelf.activity stopAnimating];
         [[weakSelf tableView] reloadData];
         [[weakSelf refreshControl] performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.0];
@@ -134,20 +159,17 @@ static NSString *cellIdentifier = @"ItemTableViewCell";
 
 -(void)updateDetail:(NSDictionary *)details {
     
+    if ([details objectForKey:@"title"]) {
+        self.title = [details objectForKey:@"title"];
+    }
+    
     if (self.tableItems == nil) {
         self.tableItems = [NSMutableArray array];
     }
     
-    if ([details objectForKey:@"title"]) {
-        self.naviBar.topItem.title = [details objectForKey:@"title"];
-    }
-    
     if ([details objectForKey:@"rows"]) {
-        for (NSDictionary *dict in [details objectForKey:@"rows"]) {
-            if ([dict objectForKey:@"title"] != [NSNull null] || [dict objectForKey:@"description"] != [NSNull null] || [dict objectForKey:@"imageHref"] != [NSNull null]) {
-                [self.tableItems addObject:dict];
-            }
-        }
+        self.tableItems = nil;
+        self.tableItems = [ItemModel getModelArrayFromJson:[details objectForKey:@"rows"]];
     }
     
     [self.tableView reloadData];

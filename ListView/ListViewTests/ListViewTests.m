@@ -20,9 +20,15 @@
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
     
-    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    self.vc = [storyboard instantiateViewControllerWithIdentifier:@"ViewController"];
+    UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.vc = [[ViewController alloc] init];
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:self.vc];
+    window.rootViewController = navController;
+    window.backgroundColor = [UIColor whiteColor];
+    [window makeKeyAndVisible];
+    
     [self.vc performSelectorOnMainThread:@selector(loadView) withObject:nil waitUntilDone:YES];
+    [self.vc viewDidAppear:NO];
 }
 
 
