@@ -60,7 +60,7 @@
     [self.contentView addConstraints:horizontalDesc];
 
     // Vertical layouts
-    NSArray *verticalImageTop =[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-padding-[imageView]->=padding-|" options:0 metrics:metrics views:views];
+    NSArray *verticalImageTop =[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-padding-[imageView]->=padding@500-|" options:0 metrics:metrics views:views];
     NSArray *verticalTitleandDescription =[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-padding-[title]-[description]->=padding-|" options:0 metrics:metrics views:views];
     [self.contentView addConstraints:verticalImageTop];
     [self.contentView addConstraints:verticalTitleandDescription];
